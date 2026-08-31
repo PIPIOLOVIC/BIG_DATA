@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 import requests
 
@@ -91,10 +92,11 @@ def ejecutar_pipeline(df):
     # 3.7 Resultado
     # --------------------------------------------------------
 
-    archivo_salida = (
-        "data/processed/"
-        "auto_resultado.csv"
-    )
+    base_dir = Path(__file__).resolve().parent.parent
+    carpeta_salida = base_dir / "data" / "processed"
+    carpeta_salida.mkdir(parents=True, exist_ok=True)
+
+    archivo_salida = carpeta_salida / "auto_resultado.csv"
 
     df.to_csv(
         archivo_salida,
