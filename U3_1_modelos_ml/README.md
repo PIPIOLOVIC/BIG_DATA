@@ -17,31 +17,37 @@ U3_1_modelos_ml/
 │   └── births-and-deaths-projected-to-2100.csv       # Dataset demográfico histórico y proyecciones
 ├── notebook/
 │   ├── births-and-deaths-projected-to-2100.csv       # Copia local de respaldo para ejecución sin conexión
-│   └── U3_1_modelos_regresion_demografia.ipynb      # Notebook resuelto y ejecutado con todas las respuestas y visualizaciones
+│   ├── U3_1_modelos_regresion_demografia.ipynb      # Notebook completo (base de México + Partes 19-21 con los 2 ejercicios)
+│   └── U3_1_ejercicios_extracciones.ipynb           # Notebook dedicado a los ejercicios de extracción (China y México >= 2000)
 └── source/
-    └── modelos_regresion.py                          # Pipeline modular en Python para entrenamiento y proyecciones
+    └── modelos_regresion.py                          # Pipeline modular en Python para México, China y México >= 2000
 ```
 
 ---
 
-## 🎯 Objetivo de la Práctica
+## 🎯 Objetivo de la Práctica y Ejercicios
 
-Construir y comparar visualmente tres modelos de aprendizaje supervisado para proyectar el número de **nacimientos** y **defunciones** en México hacia el año 2100 utilizando datos históricos (1950–2023):
+Construir, comparar visualmente y evaluar tres modelos de aprendizaje supervisado (**Regresión Lineal Simple**, **Regresión Polinomial de Grado 2** y **Random Forest Regressor**) para proyectar **nacimientos** y **defunciones** hacia el año 2100:
 
-1. **Regresión Lineal Simple** ($y = ax + b$)
-2. **Regresión Polinomial de Grado 2** ($y = ax^2 + bx + c$)
-3. **Random Forest Regressor** (Ensamble de 100 árboles de decisión)
+1. **Práctica Base:** México con datos históricos completos (1950–2023).
+2. **Ejercicio 1:** Extracción del país de **China** (1950–2023).
+3. **Ejercicio 2:** Extracción de **México a partir del año 2000** (2000–2023).
 
 ---
 
 ## 📊 Hallazgos y Comparativa de Modelos
 
-| Modelo | Comportamiento en Nacimientos (hacia 2100) | Comportamiento en Defunciones (hacia 2100) | Capacidad de Extrapolación |
-|---|---|---|---|
-| **Regresión Lineal** | Proyecta un aumento indefinido (~3.14M), ignorando la inflexión demográfica desde el 2000. | Proyecta un aumento lineal continuo (~981 mil), más conservador que OWID. | Fija y rígida; asume tasa de cambio constante. |
-| **Regresión Polinomial (Grado 2)** | Se ajusta muy bien a los datos históricos, pero se desploma a valores negativos absurdos (~ -4.40M en 2100). | Se ajusta a la aceleración histórica y se dispara de forma agresiva (~3.51M en 2100). | Peligrosa y divergente fuera del intervalo de entrenamiento. |
-| **Random Forest** | Excelente ajuste histórico, pero a partir de 2024 genera una línea horizontal plana (~2.05M). | Excelente ajuste histórico, pero a partir de 2024 se estanca en una meseta constante (~869 mil). | Nula; los árboles de decisión no extrapolan fuera de sus hojas observadas. |
-| **OWID (ONU - Referencia)** | Descenso suave y paulatino hacia ~1.10M en 2100 basado en cohortes y fecundidad. | Incremento gradual por envejecimiento hacia ~1.79M en 2100. | Basada en dinámica demográfica multivariada. |
+### 1. Resumen por Modelo y Experimento (Nacimientos hacia 2100)
+
+| Experimento / Extracción | Referencia OWID (2100) | Regresión Lineal (2100) | Regresión Polinomial (2100) | Random Forest (2100) |
+|---|---|---|---|---|
+| **México Completo (1950–2023)** | ~1.10M | ~3.14M (Sube erróneamente) | ~ -4.40M (Colapso negativo) | ~2.05M (Meseta plana) |
+| **Ejercicio 1: China (1950–2023)** | ~3.10M | ~352 mil (Fuerte descenso) | ~ -48.33M (Colapso severo) | ~9.49M (Meseta plana) |
+| **Ejercicio 2: México (2000–2023)** | ~1.10M | **~934 mil (¡Casi idéntico a OWID!)** | **~905 mil (Estable)** | ~2.05M (Meseta plana) |
+
+### 2. Hallazgo Clave del Ejercicio 2 (México post-2000 vs 1950)
+- **1950–2023:** La tasa de natalidad creció de 1950 a 1990 y luego cayó, provocando que la Regresión Lineal aprendiera una pendiente positiva artificial ($+7,835$ nacimientos/año), proyectando más de 3.1 millones de nacimientos.
+- **2000–2023:** Al delimitar la ventana histórica a la fase post-transición demográfica (a partir del 2000), la tendencia de natalidad es estrictamente decreciente ($-14,819$ nacimientos/año). Gracias a ello, la **Regresión Lineal simple converge notablemente con las proyecciones multivariadas de la ONU/OWID** ($1.67\text{M}$ vs $1.64\text{M}$ en 2050, y $934\text{K}$ vs $1.09\text{M}$ en 2100).
 
 ---
 
@@ -53,13 +59,19 @@ Instalar dependencias necesarias:
 pip install pandas numpy matplotlib scikit-learn jinja2
 ```
 
-### 2. Ejecutar el Notebook
-Abrir Jupyter Notebook o VS Code y ejecutar:
-```bash
-jupyter notebook notebook/U3_1_modelos_regresion_demografia.ipynb
-```
+### 2. Ejecutar los Notebooks
+Puedes abrir y visualizar directamente cualquiera de los dos notebooks pre-ejecutados:
+- **Notebook dedicado a los ejercicios:**
+  ```bash
+  jupyter notebook notebook/U3_1_ejercicios_extracciones.ipynb
+  ```
+- **Notebook completo:**
+  ```bash
+  jupyter notebook notebook/U3_1_modelos_regresion_demografia.ipynb
+  ```
 
 ### 3. Ejecutar el script modular
+Ejecuta los análisis para México, China y México >= 2000 en la terminal:
 ```bash
 python source/modelos_regresion.py
 ```

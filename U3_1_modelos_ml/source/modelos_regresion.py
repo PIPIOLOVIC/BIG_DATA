@@ -43,13 +43,17 @@ def cargar_datos(ruta_local=LOCAL_CSV, url=DATA_URL):
     return df
 
 
-def preparar_datos_pais(df, pais="Mexico", anio_corte=2023):
+def preparar_datos_pais(df, pais="Mexico", anio_corte=2023, anio_inicio=None):
     """
-    Filtra los datos por país y separa los datos históricos y proyectados.
+    Filtra los datos por país y rango de años, separando histórico y proyecciones.
     """
     df_pais = df[df["Entity"] == pais].copy()
+    if anio_inicio is not None:
+        df_pais = df_pais[df_pais["Year"] >= anio_inicio].copy()
+        
     df_historico = df_pais[df_pais["Year"] <= anio_corte].copy()
-    df_proyectado = df_pais[df_pais["Year"] > anio_corte].copy()
+    df_proyectado = df[df["Entity"] == pais].copy()
+    df_proyectado = df_proyectado[df_proyectado["Year"] > anio_corte].copy()
     return df_historico, df_proyectado
 
 
@@ -87,10 +91,15 @@ def entrenar_modelos(X, y, X_futuro, grado_poly=2):
     }
 
 
-def main():
-    df = cargar_datos()
-    df_hist, df_proy = preparar_datos_pais(df, "Mexico", 2023)
+def ejecutar_analisis(df, pais, anio_inicio=None, anio_corte=2023, titulo=""):
+    """
+    Ejecuta el pipeline completo de entrenamiento y despliega resultados para 2100.
+    """
+    print(f"\n{'='*60}")
+    print(f"ANÁLISIS: {titulo} ({pais}, Años: {anio_inicio or 'inicio'} a {anio_corte})")
+    print(f"{'='*60}")
     
+    df_hist, df_proy = preparar_datos_pais(df, pais=pais, anio_corte=anio_corte, anio_inicio=anio_inicio)
     X = df_hist[["Year"]]
     y_nacimientos = df_hist["births"]
     y_defunciones = df_hist["deaths"]
@@ -98,17 +107,36 @@ def main():
     anios_futuros = np.arange(2024, 2101).reshape(-1, 1)
     X_futuro = pd.DataFrame(anios_futuros, columns=["Year"])
     
-    print("\n--- Entrenando modelos para Nacimientos ---")
     res_nac = entrenar_modelos(X, y_nacimientos, X_futuro)
-    print(f"Nacimientos 2100 (Lineal):     {res_nac['lineal']['fut'][-1]:,.0f}")
-    print(f"Nacimientos 2100 (Polinomial): {res_nac['polinomial']['fut'][-1]:,.0f}")
-    print(f"Nacimientos 2100 (RF):         {res_nac['rf']['fut'][-1]:,.0f}")
-    
-    print("\n--- Entrenando modelos para Defunciones ---")
+    print("\n--- Nacimientos hacia 2100 ---")
+    owid_nac_2100 = df_proy.loc[df_proy["Year"] == 2100, "births"].values[0] if not df_proy.empty else np.nan
+    print(f"OWID Referencia (2100):        {owid_nac_2100:,.0f}")
+    print(f"Regresión Lineal (2100):       {res_nac['lineal']['fut'][-1]:,.0f}")
+    print(f"Regresión Polinomial (2100):   {res_nac['polinomial']['fut'][-1]:,.0f}")
+    print(f"Random Forest (2100):          {res_nac['rf']['fut'][-1]:,.0f}")
+
     res_def = entrenar_modelos(X, y_defunciones, X_futuro)
-    print(f"Defunciones 2100 (Lineal):     {res_def['lineal']['fut'][-1]:,.0f}")
-    print(f"Defunciones 2100 (Polinomial): {res_def['polinomial']['fut'][-1]:,.0f}")
-    print(f"Defunciones 2100 (RF):         {res_def['rf']['fut'][-1]:,.0f}")
+    print("\n--- Defunciones hacia 2100 ---")
+    owid_def_2100 = df_proy.loc[df_proy["Year"] == 2100, "deaths"].values[0] if not df_proy.empty else np.nan
+    print(f"OWID Referencia (2100):        {owid_def_2100:,.0f}")
+    print(f"Regresión Lineal (2100):       {res_def['lineal']['fut'][-1]:,.0f}")
+    print(f"Regresión Polinomial (2100):   {res_def['polinomial']['fut'][-1]:,.0f}")
+    print(f"Random Forest (2100):          {res_def['rf']['fut'][-1]:,.0f}")
+    
+    return {"nacimientos": res_nac, "defunciones": res_def}
+
+
+def main():
+    df = cargar_datos()
+    
+    # 1. Práctica base: México histórico completo
+    ejecutar_analisis(df, pais="Mexico", anio_inicio=None, anio_corte=2023, titulo="Práctica Base: México Completo")
+    
+    # 2. Ejercicio 1: Extracción de China
+    ejecutar_analisis(df, pais="China", anio_inicio=None, anio_corte=2023, titulo="Ejercicio 1: Extraer China")
+    
+    # 3. Ejercicio 2: Extracción de México a partir del 2000
+    ejecutar_analisis(df, pais="Mexico", anio_inicio=2000, anio_corte=2023, titulo="Ejercicio 2: Extraer México >= 2000")
 
 
 if __name__ == "__main__":
