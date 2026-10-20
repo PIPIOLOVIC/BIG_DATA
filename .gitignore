@@ -1,4 +1,5 @@
 **/.venv/
 .vscode/
 **/_psycache__/
+**/__pycache__/
 **/ipynb_checkpoints/
