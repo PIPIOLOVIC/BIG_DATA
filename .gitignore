@@ -2,4 +2,5 @@
 .vscode/
 **/_psycache__/
 **/__pycache__/
+Examen2/data/raw/nyc_taxi_examen.csv
 **/ipynb_checkpoints/
