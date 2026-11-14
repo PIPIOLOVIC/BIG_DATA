@@ -1,6 +1,25 @@
+# Entornos virtuales
 **/.venv/
+**/venv/
+**/env/
+
+# IDE y cache de Python / Jupyter
 .vscode/
 **/_psycache__/
 **/__pycache__/
-Examen2/data/raw/nyc_taxi_examen.csv
+**/.ipynb_checkpoints/
 **/ipynb_checkpoints/
+
+# Datasets y archivos de datos (evita errores al hacer push a GitHub / Databricks)
+**/data/
+*.csv
+*.parquet
+*.tsv
+*.xlsx
+*.xls
+*.zip
+*.tar.gz
+Examen2/data/raw/nyc_taxi_examen.csv
+
+# Logs de depuracion
+git_push_debug.log
