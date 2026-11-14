@@ -6,3 +6,6 @@ Práctica introductoria de **PySpark** ejecutada localmente en VS Code usando un
 - Python 3.12
 - Java (JDK 17 o 21)
 - Paquetes en `.venv`: `pyspark`, `ipykernel`, `pyarrow`
+
+Conectado
+  y probado desde Databricks
